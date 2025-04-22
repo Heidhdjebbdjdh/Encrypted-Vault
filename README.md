@@ -1,69 +1,25 @@
-⚠️ Important:
-Must be run as Administrator
+✅ FEATURES:
+Login screen with custom color and styling
 
-Works only on Windows CMD
+Hidden .file_vault folder with strict access permissions
 
-Do not rename .file_vault or its contents
+Drag & drop support (works from Explorer)
 
-🧭 How to Use:
-Create a .bat File:
+Menu system for:
 
-Open Notepad
+🔐 Base64 Encrypt / Decrypt using certutil
 
-Paste the full code from this script
+🧠 Binary Encrypt / Decrypt
 
-Save as vault.bat with Save as type: All Files
+📜 Access log viewer
 
-Right-click the file → Run as administrator
+📂 Open vault folder
 
-Vault Access:
+☠️ Self-destruct vault with password
 
-You will see a login screen styled CMD
+🔑 Passwords:
 
-Enter the password: 122539 to proceed
+Vault access: 122539  (changeable)
 
-Menu Options:
-
-css
-Copy
-Edit
-[1] Encrypt a file
-[2] Decrypt a file
-[3] View Access Log
-[4] Open Vault Folder
-[5] Self-Destruct Vault
-[6] Encrypt file to Binary (1s & 0s)
-[7] Decrypt Binary to File
-[0] Exit
-Encrypt/Decrypt:
-
-Drag and drop files when prompted
-
-The script handles them inside the .file_vault folder
-
-Self-Destruct:
-
-Destroys all files/folders inside .file_vault
-
-Requires password confirmation (122539)
-
-💡 Features:
-Stylized Login Window: Light blue CMD with login screen
-
-Vault Password: Required to access menu (Password is 122539)
-
-Self-Destruct: Requires a separate confirmation password (Also 122539)
-
-File Vault: Hidden .file_vault folder only accessible via script
-
-Encrypt/Decrypt: Uses certutil to handle file encryption and decryption
-
-Access Log: Tracks all encryption/decryption activity
-
-Binary Encryption: Converts files into binary (ones and zeroes)
-
-Binary Decryption: Restores from binary back to original file
-
-Run As Admin: Required for full permissions and shredding
-
+Self-destruct: 122539 (changeable)
 
