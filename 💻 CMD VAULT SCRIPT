@@ -1,0 +1,164 @@
+@echo off
+setlocal EnableDelayedExpansion
+title Secure Vault
+color 1F
+
+:: CONFIGURATION
+set "VAULT_PASSWORD=122539"
+set "SHRED_PASSWORD=122539"
+set "VAULT_DIR=%USERPROFILE%\.file_vault"
+set "LOG_FILE=%VAULT_DIR%\access.log"
+set "BINARY_DIR=%VAULT_DIR%\binary"
+
+:: INIT VAULT
+if not exist "%VAULT_DIR%" (
+    mkdir "%VAULT_DIR%"
+    icacls "%VAULT_DIR%" /inheritance:d /grant:r "%USERNAME%:(OI)(CI)F" >nul
+)
+if not exist "%LOG_FILE%" ( type nul > "%LOG_FILE%" )
+if not exist "%BINARY_DIR%" ( mkdir "%BINARY_DIR%" )
+
+:: LOGIN SCREEN
+:login
+cls
+echo ╔════════════════════════════════════╗
+echo ║         SECURE VAULT LOGIN         ║
+echo ╚════════════════════════════════════╝
+set /p "input_password=Enter Password: "
+if not "%input_password%"=="%VAULT_PASSWORD%" (
+    echo Incorrect password.
+    timeout /t 2 >nul
+    goto login
+)
+
+:: DRAG & DROP MODE
+if not "%~1"=="" (
+    set "dragged_file=%~1"
+    goto dragmenu
+)
+
+:: MAIN MENU
+:menu
+cls
+echo =============================
+echo      Secure Vault System     
+echo =============================
+echo [1] Encrypt a file
+echo [2] Decrypt a file
+echo [3] View Access Log
+echo [4] Open Vault Folder
+echo [5] Self-Destruct Vault
+echo [6] Encrypt file to Binary
+echo [7] Decrypt Binary file
+echo [0] Exit
+echo -----------------------------
+set /p "choice=Select an option: "
+
+if "%choice%"=="1" goto encrypt
+if "%choice%"=="2" goto decrypt
+if "%choice%"=="3" goto viewlog
+if "%choice%"=="4" start "" "%VAULT_DIR%" & goto menu
+if "%choice%"=="5" goto selfdestruct
+if "%choice%"=="6" goto encryptBinary
+if "%choice%"=="7" goto decryptBinary
+if "%choice%"=="0" exit
+goto menu
+
+:encrypt
+cls
+set /p "file=Drag and drop file (or paste full path): "
+if not exist "%file%" (
+    echo File not found.
+    timeout /t 2 >nul
+    goto menu
+)
+set "encrypted_file=%VAULT_DIR%\%~nx1.enc"
+certutil -encode "%file%" "%encrypted_file%" >nul
+echo [%date% %time%] Encrypted: %~nx1 >> "%LOG_FILE%"
+echo File encrypted to: %encrypted_file%
+pause
+goto menu
+
+:decrypt
+cls
+set /p "file=Drag and drop .enc file (or paste path): "
+if not exist "%file%" (
+    echo File not found.
+    timeout /t 2 >nul
+    goto menu
+)
+set "decrypted_file=%~dp1%~n1_decrypted%~x1"
+certutil -decode "%file%" "%decrypted_file%" >nul
+echo [%date% %time%] Decrypted: %~nx1 >> "%LOG_FILE%"
+echo File decrypted to: %decrypted_file%
+pause
+goto menu
+
+:viewlog
+cls
+type "%LOG_FILE%"
+echo.
+pause
+goto menu
+
+:selfdestruct
+cls
+echo !!! WARNING: THIS WILL DELETE YOUR ENTIRE VAULT !!!
+set /p "confirm=Enter self-destruct password: "
+if not "%confirm%"=="%SHRED_PASSWORD%" (
+    echo Incorrect password.
+    timeout /t 2 >nul
+    goto menu
+)
+rmdir /s /q "%VAULT_DIR%"
+echo Vault destroyed.
+timeout /t 2 >nul
+exit
+
+:encryptBinary
+cls
+set /p "file=Drag and drop file to binary encrypt: "
+if not exist "%file%" (
+    echo File not found.
+    timeout /t 2 >nul
+    goto menu
+)
+set "output_bin=%BINARY_DIR%\%~nx1.bin"
+powershell -Command "Get-Content -Path '%file%' -Encoding Byte | ForEach-Object { [Convert]::ToString($_, 2).PadLeft(8, '0') } | Out-File -Encoding ASCII '%output_bin%'"
+echo [%date% %time%] Binary Encrypted: %~nx1 >> "%LOG_FILE%"
+echo Binary file saved as: %output_bin%
+pause
+goto menu
+
+:decryptBinary
+cls
+set /p "file=Drag and drop .bin file to restore: "
+if not exist "%file%" (
+    echo File not found.
+    timeout /t 2 >nul
+    goto menu
+)
+set "output_file=%~dp1%~n1_restored%~x1"
+powershell -Command "$bits = Get-Content '%file%'; $bytes = [byte[]]@(); foreach ($bit in $bits) { $bytes += [Convert]::ToByte($bit, 2) }; [IO.File]::WriteAllBytes('%output_file%', $bytes)"
+echo [%date% %time%] Binary Decrypted: %~nx1 >> "%LOG_FILE%"
+echo Restored to: %output_file%
+pause
+goto menu
+
+:dragmenu
+cls
+echo File Detected: %dragged_file%
+echo What would you like to do?
+echo [1] Encrypt
+echo [2] Binary Encrypt
+echo [3] Cancel
+set /p "opt=> "
+if "%opt%"=="1" (
+    set "file=%dragged_file%"
+    goto encrypt
+)
+if "%opt%"=="2" (
+    set "file=%dragged_file%"
+    goto encryptBinary
+)
+goto menu
